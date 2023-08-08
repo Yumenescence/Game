@@ -3,31 +3,37 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'dart:async';
 
+import 'package:just_audio/just_audio.dart';
+
 const BALL_SIZE = 40.0;
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Падающий шар',
+      title: 'FallingBallGame',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyGame(),
+      home: const FallingBallGame(),
     );
   }
 }
 
-class MyGame extends StatefulWidget {
+class FallingBallGame extends StatefulWidget {
+  const FallingBallGame({super.key});
+
   @override
-  _MyGameState createState() => _MyGameState();
+  State<FallingBallGame> createState() => _FallingBallGameState();
 }
 
-class _MyGameState extends State<MyGame> {
+class _FallingBallGameState extends State<FallingBallGame> {
   double ballY = 0;
   double ballSpeed = 5;
   int ballDirection = 1;
@@ -35,6 +41,13 @@ class _MyGameState extends State<MyGame> {
   bool ballTapped = false;
   bool gameOver = true;
   double height = 0;
+  final audio = AudioPlayer();
+
+  @override
+  void initState() {
+    super.initState();
+    audio.setAsset('assets/sound.mp3');
+  }
 
   void startGame() {
     setState(() {
@@ -44,8 +57,10 @@ class _MyGameState extends State<MyGame> {
       score = 0;
       gameOver = false;
       ballY = 0;
+      ballDirection = 1;
     });
-    Timer.periodic(Duration(milliseconds: 16), (timer) {
+
+    Timer.periodic(const Duration(milliseconds: 16), (timer) {
       if (gameOver) {
         return;
       }
@@ -60,10 +75,12 @@ class _MyGameState extends State<MyGame> {
     });
   }
 
-  void changeDirection() {
+  void changeDirection() async {
     if (gameOver) {
       return;
     }
+    audio.seek(Duration.zero);
+    audio.play();
     setState(() {
       ballDirection *= -1;
       score++;
@@ -81,7 +98,7 @@ class _MyGameState extends State<MyGame> {
               gradient: LinearGradient(
                 colors: [Colors.blue.shade100, Colors.amber.shade100],
                 begin: Alignment.topCenter,
-                stops: [0.5, 0.5],
+                stops: const [0.5, 0.5],
                 end: Alignment.bottomCenter,
               ),
             ),
@@ -94,7 +111,7 @@ class _MyGameState extends State<MyGame> {
                     child: Container(
                       width: BALL_SIZE,
                       height: BALL_SIZE,
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                         color: Colors.red,
                         shape: BoxShape.circle,
                       ),
@@ -103,8 +120,8 @@ class _MyGameState extends State<MyGame> {
                 if (gameOver)
                   Center(
                     child: TextButton(
-                      child: Text('Start game'),
                       onPressed: startGame,
+                      child: const Text('Start game'),
                     ),
                   ),
                 Positioned(
@@ -112,7 +129,7 @@ class _MyGameState extends State<MyGame> {
                   left: 16,
                   child: Text(
                     'Score: $score',
-                    style: TextStyle(fontSize: 20),
+                    style: const TextStyle(fontSize: 20),
                   ),
                 ),
               ],
