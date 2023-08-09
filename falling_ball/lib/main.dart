@@ -32,55 +32,55 @@ class FallingBallGame extends StatefulWidget {
 }
 
 class _FallingBallGameState extends State<FallingBallGame> {
-  double ballY = 0;
-  double ballSpeed = 5;
-  int ballDirection = 1;
+  double ballPositionY = 0;
+  double ballFallSpeed = 5;
+  int ballVerticalDirection = 1;
   int score = 0;
-  bool ballTapped = false;
-  bool gameOver = true;
-  double height = 0;
-  final audio = AudioPlayer();
+  bool isBallTapped = false;
+  bool isGameOver = true;
+  double screenHeight = 0;
+  final audioPlayer = AudioPlayer();
 
   @override
   void initState() {
     super.initState();
-    audio.setAsset('assets/sound.mp3');
+    audioPlayer.setAsset('assets/sound.mp3');
   }
 
-  void startGame() {
+  void initializeGame() {
     setState(() {
-      height = MediaQuery.of(context).size.height -
+      screenHeight = MediaQuery.of(context).size.height -
           MediaQuery.of(context).padding.top -
           MediaQuery.of(context).padding.bottom;
       score = 0;
-      gameOver = false;
-      ballY = 0;
-      ballDirection = 1;
+      isGameOver = false;
+      ballPositionY = 0;
+      ballVerticalDirection = 1;
     });
 
     Timer.periodic(const Duration(milliseconds: 16), (timer) {
-      if (gameOver) {
+      if (isGameOver) {
         return;
       }
       setState(() {
-        ballY += ballSpeed * ballDirection;
+        ballPositionY += ballFallSpeed * ballVerticalDirection;
 
-        if (ballY <= 0 || ballY >= (height - BALL_SIZE)) {
-          gameOver = true;
+        if (ballPositionY <= 0 || ballPositionY >= (screenHeight - BALL_SIZE)) {
+          isGameOver = true;
           timer.cancel();
         }
       });
     });
   }
 
-  void changeDirection() async {
-    if (gameOver) {
+  void reverseBallDirection() async {
+    if (isGameOver) {
       return;
     }
-    audio.seek(Duration.zero);
-    audio.play();
+    audioPlayer.seek(Duration.zero);
+    audioPlayer.play();
     setState(() {
-      ballDirection *= -1;
+      ballVerticalDirection *= -1;
       score++;
     });
   }
@@ -90,7 +90,7 @@ class _FallingBallGameState extends State<FallingBallGame> {
     return SafeArea(
       child: Scaffold(
         body: GestureDetector(
-          onTap: changeDirection,
+          onTap: reverseBallDirection,
           child: Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -102,10 +102,10 @@ class _FallingBallGameState extends State<FallingBallGame> {
             ),
             child: Stack(
               children: [
-                if (!gameOver)
+                if (!isGameOver)
                   Positioned(
                     left: MediaQuery.of(context).size.width / 2 - 20,
-                    top: ballY,
+                    top: ballPositionY,
                     child: Container(
                       width: BALL_SIZE,
                       height: BALL_SIZE,
@@ -115,10 +115,10 @@ class _FallingBallGameState extends State<FallingBallGame> {
                       ),
                     ),
                   ),
-                if (gameOver)
+                if (isGameOver)
                   Center(
                     child: TextButton(
-                      onPressed: startGame,
+                      onPressed: initializeGame,
                       child: const Text('Start game'),
                     ),
                   ),
