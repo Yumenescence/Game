@@ -40,11 +40,19 @@ class _FallingBallGameState extends State<FallingBallGame> {
   bool isGameOver = true;
   double screenHeight = 0;
   final audioPlayer = AudioPlayer();
+  Timer? gameTimer;
 
   @override
   void initState() {
     super.initState();
     audioPlayer.setAsset('assets/sound.mp3');
+  }
+
+  @override
+  void dispose() {
+    gameTimer?.cancel();
+    audioPlayer.dispose();
+    super.dispose();
   }
 
   void initializeGame() {
@@ -58,7 +66,7 @@ class _FallingBallGameState extends State<FallingBallGame> {
       ballVerticalDirection = 1;
     });
 
-    Timer.periodic(const Duration(milliseconds: 16), (timer) {
+    gameTimer = Timer.periodic(const Duration(milliseconds: 16), (timer) {
       if (isGameOver) {
         return;
       }
