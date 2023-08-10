@@ -40,7 +40,7 @@ class _FallingBallGameState extends State<FallingBallGame> {
   bool isGameOver = true;
   double screenHeight = 0;
   final audioPlayer = AudioPlayer();
-  Timer? gameTimer;
+  Timer? gameTimer; // Timer for ball movement
 
   @override
   void initState() {
@@ -73,6 +73,7 @@ class _FallingBallGameState extends State<FallingBallGame> {
       setState(() {
         ballPositionY += ballFallSpeed * ballVerticalDirection;
 
+// Check if the ball hits the top or bottom boundaries
         if (ballPositionY <= 0 || ballPositionY >= (screenHeight - BALL_SIZE)) {
           isGameOver = true;
           timer.cancel();

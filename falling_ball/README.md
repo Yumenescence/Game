@@ -1,16 +1,26 @@
-# falling_ball
+# Falling Ball Game
 
-A new Flutter project.
+Hello! This is a small Flutter project - the "Falling Ball" game. In this game, your goal is to tap the screen to change the ball's vertical direction and avoid collisions with the top and bottom edges of the screen.
 
-## Getting Started
+## About the Project
 
-This project is a starting point for a Flutter application.
+This project is a mobile application developed using Flutter and the Just Audio package for audio playback. The main gameplay mechanic involves changing the ball's vertical direction upon tapping the screen. The game ends when the ball collides with the top or bottom edge of the screen.
 
-A few resources to get you started if this is your first Flutter project:
+## Installation
+To install the project, follow these steps:
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+1. Clone the repository using Git:
+```git clone <repository URL>```
+2. Navigate to the project directory:
+```cd path/to/falling_ball_game```
+3. Install the dependencies:
+```flutter pub get```
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Running
+To run the application, execute the command:
+```flutter run```
+
+## Usage
+- To start a new game, press the "Start game" button.
+- During the game, tap the screen to change the ball's direction and avoid collisions with the edges.
+- Your goal is to achieve the highest score possible.
