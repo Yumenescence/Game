@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'dart:async';
 
-import 'package:just_audio/just_audio.dart';
+import 'package:provider/provider.dart';
 
-const BALL_SIZE = 40.0;
+import 'ball.dart';
+import 'game_manager.dart';
 
 void main() {
   runApp(const MyApp());
@@ -24,122 +24,79 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class FallingBallGame extends StatefulWidget {
+class FallingBallGame extends StatelessWidget {
   const FallingBallGame({super.key});
 
   @override
-  State<FallingBallGame> createState() => _FallingBallGameState();
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider(
+        create: (context) => GameManager(), child: const _Screen());
+  }
 }
 
-class _FallingBallGameState extends State<FallingBallGame> {
-  double ballPositionY = 0;
-  double ballFallSpeed = 5;
-  int ballVerticalDirection = 1;
-  int score = 0;
-  bool isBallTapped = false;
-  bool isGameOver = true;
-  double screenHeight = 0;
-  final audioPlayer = AudioPlayer();
-  Timer? gameTimer; // Timer for ball movement
-
-  @override
-  void initState() {
-    super.initState();
-    audioPlayer.setAsset('assets/sound.mp3');
-  }
-
-  @override
-  void dispose() {
-    gameTimer?.cancel();
-    audioPlayer.dispose();
-    super.dispose();
-  }
-
-  void initializeGame() {
-    setState(() {
-      screenHeight = MediaQuery.of(context).size.height -
-          MediaQuery.of(context).padding.top -
-          MediaQuery.of(context).padding.bottom;
-      score = 0;
-      isGameOver = false;
-      ballPositionY = 0;
-      ballVerticalDirection = 1;
-    });
-
-    gameTimer = Timer.periodic(const Duration(milliseconds: 16), (timer) {
-      if (isGameOver) {
-        return;
-      }
-      setState(() {
-        ballPositionY += ballFallSpeed * ballVerticalDirection;
-
-// Check if the ball hits the top or bottom boundaries
-        if (ballPositionY <= 0 || ballPositionY >= (screenHeight - BALL_SIZE)) {
-          isGameOver = true;
-          timer.cancel();
-        }
-      });
-    });
-  }
-
-  void reverseBallDirection() async {
-    if (isGameOver) {
-      return;
-    }
-    audioPlayer.seek(Duration.zero);
-    audioPlayer.play();
-    setState(() {
-      ballVerticalDirection *= -1;
-      score++;
-    });
-  }
+class _Screen extends StatelessWidget {
+  const _Screen();
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        body: GestureDetector(
-          onTap: reverseBallDirection,
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.blue.shade100, Colors.amber.shade100],
-                begin: Alignment.topCenter,
-                stops: const [0.5, 0.5],
-                end: Alignment.bottomCenter,
+    final double screenHeight = MediaQuery.of(context).size.height -
+        MediaQuery.of(context).padding.top -
+        MediaQuery.of(context).padding.bottom;
+    final bool isGameOver = context.select<GameManager, bool>(
+        (GameManager gameManager) => gameManager.isGameOver);
+    final GameManager gameManager = context.read<GameManager>();
+
+    return ChangeNotifierProvider(
+      create: (context) => GameManager(),
+      child: SafeArea(
+        child: Scaffold(
+          body: GestureDetector(
+            onTap: () => gameManager.onTap(),
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.blue.shade100, Colors.amber.shade100],
+                  begin: Alignment.topCenter,
+                  stops: const [0.5, 0.5],
+                  end: Alignment.bottomCenter,
+                ),
               ),
-            ),
-            child: Stack(
-              children: [
-                if (!isGameOver)
-                  Positioned(
-                    left: MediaQuery.of(context).size.width / 2 - 20,
-                    top: ballPositionY,
-                    child: Container(
-                      width: BALL_SIZE,
-                      height: BALL_SIZE,
-                      decoration: const BoxDecoration(
-                        color: Colors.red,
-                        shape: BoxShape.circle,
+              child: Stack(
+                children: [
+                  if (!isGameOver)
+                    Positioned(
+                      left: MediaQuery.of(context).size.width / 2 - 20,
+                      top: context.select<GameManager, double>(
+                          (GameManager gameManager) =>
+                              gameManager.ballPositionY),
+                      child: Container(
+                        width: BALL_SIZE,
+                        height: BALL_SIZE,
+                        decoration: const BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
                       ),
                     ),
-                  ),
-                if (isGameOver)
-                  Center(
-                    child: TextButton(
-                      onPressed: initializeGame,
-                      child: const Text('Start game'),
+                  if (isGameOver)
+                    Center(
+                      child: TextButton(
+                        onPressed: () {
+                          gameManager.startGame(screenHeight);
+                        },
+                        child: const Text('Start game'),
+                      ),
+                    ),
+                  Positioned(
+                    top: 16,
+                    left: 16,
+                    child: Text(
+                      'Score: ${context.select<GameManager, int>((GameManager gameManager) => gameManager.score)}',
+                      style: const TextStyle(fontSize: 20),
                     ),
                   ),
-                Positioned(
-                  top: 16,
-                  left: 16,
-                  child: Text(
-                    'Score: $score',
-                    style: const TextStyle(fontSize: 20),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
